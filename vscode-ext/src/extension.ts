@@ -75,6 +75,13 @@ export function activate(context: vscode.ExtensionContext) {
             stream.markdown(msg.text);
           } else if (msg.type === "error") {
             stream.markdown(`\n\nError: ${msg.message}`);
+          } else if (msg.type === "validation") {
+            const summary = msg.status === "not_applicable" ? "No code generated" :
+              msg.status === "warnings" ? "Static warnings" : "No issues found by limited static checks";
+            stream.markdown(`\n\n**${summary}. Compilation not run.**\n`);
+            for (const finding of msg.findings ?? []) {
+              stream.markdown(`- ${finding.message}${finding.source ? ` (${finding.source})` : ""}\n`);
+            }
           }
         }
       }

@@ -3,8 +3,10 @@
   python -m plc_rag.index
 """
 import json
+from typing import cast
 
 import chromadb
+from chromadb.api.types import Embedding
 
 from .config import CHROMA_DIR, CHUNKS_FILE, COLLECTION
 from .llm import embed
@@ -19,15 +21,18 @@ def main() -> None:
         client.delete_collection(COLLECTION)
     except Exception:
         pass
-    col = client.create_collection(COLLECTION, metadata={"hnsw:space": "cosine"})
+    col = client.create_collection(COLLECTION, metadata={"hnsw:space": "cosine", "evidence_roles": True})
 
     for i in range(0, len(chunks), BATCH):
         batch = chunks[i : i + BATCH]
         docs = [f"search_document: {c['heading_path']}\n{c['text']}" for c in batch]
         col.add(
             ids=[str(i + j) for j in range(len(batch))],
-            embeddings=embed(docs),
-            metadatas=[{"url": c["url"], "heading_path": c["heading_path"]} for c in batch],
+            embeddings=cast(list[Embedding], embed(docs)),
+            metadatas=[{
+                "url": c["url"], "heading_path": c["heading_path"],
+                "content_role": c.get("content_role", "mixed"),
+            } for c in batch],
         )
         print(f"{min(i + BATCH, len(chunks))}/{len(chunks)}")
 

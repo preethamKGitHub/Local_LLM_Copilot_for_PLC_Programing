@@ -3,6 +3,17 @@ import re
 HEADING = re.compile(r"^(#{1,6})\s+(.*)")
 
 
+def content_role(text: str) -> str:
+    """Classify evidence conservatively; examples may include negative examples."""
+    code = bool(re.search(r"```|^\s*(?:PROGRAM|CLASS|FUNCTION(?:_BLOCK)?|TYPE|VAR(?:_\w+)?|METHOD)\b", text, re.M))
+    prose = bool(re.search(r"\b(?:must|only|not allowed|not supported|declared|defines|specifying|can declare)\b", text, re.I))
+    if code and not prose:
+        return "examples"
+    if prose and not code:
+        return "rules"
+    return "mixed"
+
+
 def _blocks(lines: list[str]) -> list[str]:
     """Split on blank lines, keeping fenced code blocks whole."""
     blocks, cur, in_code = [], [], False
@@ -56,6 +67,7 @@ def chunk_markdown(md: str, url: str, title: str, max_chars: int = 1600) -> list
             "heading_path": " > ".join(hp) if hp else title,
             "url": url,
             "text": text.strip(),
+            "content_role": content_role(text),
         }
         for hp, text in chunks
         if len(text.strip()) > 40

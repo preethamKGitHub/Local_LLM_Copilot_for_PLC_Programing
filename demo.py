@@ -29,4 +29,13 @@ with httpx.stream(
             print(m["text"], end="", flush=True)
         elif m["type"] == "error":
             print("\nERROR:", m["message"])
+        elif m["type"] == "validation":
+            labels = {
+                "not_applicable": "No code generated",
+                "warnings": "Static warnings",
+                "passed_checks": "No issues found by limited static checks",
+            }
+            print(f"\n\n{labels[m['status']]}. Compilation not run.")
+            for finding in m["findings"]:
+                print(f"- {finding['message']} ({finding['source'] or 'Output format'})")
 print()

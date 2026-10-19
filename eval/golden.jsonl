@@ -8,3 +8,10 @@
 {"question": "How do I define a structure type?", "expect_any": ["struct", "end_struct"]}
 {"question": "How do I define an enumeration?", "expect_any": ["enum"]}
 {"question": "How do I declare a constant?", "expect_any": ["constant"]}
+{"mode": "generate", "question": "Declare an enumeration TrafficLightColors with Red, Yellow and Green.", "expect_headings": ["Enumeration"], "expect_refusal": false}
+{"mode": "generate", "question": "Write a class Motor with a static BOOL field and a public method Start that sets it.", "expect_headings": ["Class declaration"], "expect_refusal": false}
+{"mode": "generate", "question": "Declare a function block Motor with a VAR PRIVATE static BOOL field, no instance or caller needed.", "expect_headings": ["Function block declaration"], "expect_refusal": false}
+{"mode": "generate", "question": "Write a class Child that inherits from a class Parent and adds one field.", "expect_headings": ["Class inheritance"], "expect_refusal": false}
+{"mode": "generate", "question": "Write a method overriding a public base class method with the same signature.", "expect_headings": ["Method overriding"], "expect_refusal": false}
+{"mode": "generate", "question": "Generate Mitsubishi RTRIG_P edge detection with its exact vendor-specific call signature.", "expect_headings": [], "expect_refusal": true}
+{"mode": "generate", "question": "Generate a call to undocumented vendor instruction ZPUSHP with all its exact parameters.", "expect_headings": [], "expect_refusal": true}

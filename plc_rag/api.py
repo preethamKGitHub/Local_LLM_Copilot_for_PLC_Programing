@@ -2,7 +2,7 @@
 import json
 from typing import Literal
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
@@ -10,6 +10,7 @@ from .config import CHAT_MODEL, EMBED_MODEL, NUM_CTX
 from .llm import chat_stream, ollama_models
 from .prompt import build_messages
 from .retriever import Retriever
+from .validation import REFUSAL, validate_generation
 
 app = FastAPI(title="PLC ST RAG")
 _retriever: Retriever | None = None
@@ -57,18 +58,28 @@ def health():
 def chat(req: ChatRequest):
     # Plain def: FastAPI runs it in a threadpool, so blocking HTTP calls don't stall the loop.
     query = f"{req.question}\n{req.code[:500]}" if req.code else req.question
-    hits = retriever().search(query)
-    messages, used = build_messages(
-        req.question, hits, req.mode, [t.model_dump() for t in req.history], req.code
-    )
+    source = retriever()
+    hits = source.search_generation(query) if req.mode == "generate" else source.search(query)
+    try:
+        messages, used = build_messages(
+            req.question, hits, req.mode, [t.model_dump() for t in req.history], req.code
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     def events():
         yield _sse({"type": "sources", "model": CHAT_MODEL, "sources": [
             {"n": i, "heading": h["heading_path"], "url": h["url"]} for i, h in enumerate(used, 1)
         ]})
         try:
-            for tok in chat_stream(messages):
+            answer = []
+            tokens = [REFUSAL] if req.mode == "generate" and not used else chat_stream(messages)
+            for tok in tokens:
+                if req.mode == "generate":
+                    answer.append(tok)
                 yield _sse({"type": "token", "text": tok})
+            if req.mode == "generate":
+                yield _sse({"type": "validation", **validate_generation("".join(answer), source_count=len(used))})
         except Exception as exc:
             yield _sse({"type": "error", "message": str(exc)})
         yield _sse({"type": "done"})

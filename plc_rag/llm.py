@@ -27,9 +27,14 @@ def chat_stream(messages: list[dict]) -> Iterator[str]:
             if not line:
                 continue
             data = json.loads(line)
+            content = data.get("message", {}).get("content", "")
+            if content:
+                yield content
             if data.get("done"):
+                if data.get("done_reason") == "length":
+                    raise RuntimeError("Generation reached the token limit. Shorten the request or increase PLC_MAX_NEW_TOKENS.")
                 return
-            yield data.get("message", {}).get("content", "")
+        raise RuntimeError("Ollama stream ended without a completion marker; output may be incomplete.")
 
 
 def ollama_models() -> list[str]:
