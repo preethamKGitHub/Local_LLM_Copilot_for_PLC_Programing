@@ -1,0 +1,10 @@
+{"question": "How do I declare a function block?", "expect_any": ["function_block", "end_function_block"]}
+{"question": "How do I declare input and output variables?", "expect_any": ["var_input", "var_output"]}
+{"question": "How does a FOR loop work in structured text?", "expect_any": ["end_for"]}
+{"question": "How do I use a CASE statement?", "expect_any": ["end_case"]}
+{"question": "How do I write an IF statement with ELSIF?", "expect_any": ["elsif", "end_if"]}
+{"question": "What is a WHILE loop?", "expect_any": ["end_while"]}
+{"question": "How do I declare an array?", "expect_any": ["array"]}
+{"question": "How do I define a structure type?", "expect_any": ["struct", "end_struct"]}
+{"question": "How do I define an enumeration?", "expect_any": ["enum"]}
+{"question": "How do I declare a constant?", "expect_any": ["constant"]}

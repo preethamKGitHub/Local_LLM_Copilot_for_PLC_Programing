@@ -1,0 +1,44 @@
+{
+  "name": "plc-st-copilot",
+  "displayName": "PLC ST Copilot (local RAG)",
+  "description": "Chat participant for SIMATIC AX Structured Text backed by a local RAG service.",
+  "version": "0.1.0",
+  "publisher": "local",
+  "engines": { "vscode": "^1.95.0" },
+  "categories": ["AI", "Chat"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "chatParticipants": [
+      {
+        "id": "plc-st-copilot.plc",
+        "name": "plc",
+        "fullName": "PLC ST Copilot",
+        "description": "Ask about SIMATIC AX Structured Text or generate ST code",
+        "isSticky": true,
+        "commands": [
+          { "name": "generate", "description": "Generate Structured Text code" },
+          { "name": "explain", "description": "Explain the selected ST code" }
+        ]
+      }
+    ],
+    "configuration": {
+      "title": "PLC ST Copilot",
+      "properties": {
+        "plcRag.apiUrl": {
+          "type": "string",
+          "default": "http://localhost:8000",
+          "description": "URL of the RAG API running in WSL."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.95.0",
+    "typescript": "^5.4.0"
+  }
+}
